@@ -112,33 +112,41 @@ def index():
   print request.args
   print request.form
 
-  search = ''
-  genre = ''
-  manga = False
-  for key in request.args:
-      a = request.args.getlist(key)
-      if(key == "search"):
-          for val in a:
-              search = val
-      if(key == "genre"):
-          for val in a:
-              genre += val + ","
-      if(key == "manga"):
-          manga = True
-
-  sr = searchResults(search, genre[:-1], manga)
-  #
-  # example of a database query
-  #
-  cursor = g.conn.execute("SELECT name FROM test")
   data = []
-  for result in sr:
-      anime = []
-      for item in result:
-          anime.append(item)
-          print item
-      data.append(anime)  # can also be accessed using result[0]
-  cursor.close()
+
+  if request.args.get("search") is None:
+      print "home page"
+  else:
+      search = ''
+      genre = ''
+      manga = False
+      for key in request.args:
+          a = request.args.getlist(key)
+          if(key == "search"):
+              for val in a:
+                  search = val
+          if(key == "genre"):
+              for val in a:
+                  genre += val + ","
+          if(key == "manga"):
+              manga = True
+
+      print search
+      print genre
+      print manga
+      
+      sr = searchResults(search, genre[:-1], manga)
+      #
+      # example of a database query
+      #
+      cursor = g.conn.execute("SELECT name FROM test")
+      for result in sr:
+          anime = []
+          for item in result:
+              anime.append(item)
+              print item
+          data.append(anime)  # can also be accessed using result[0]
+      cursor.close()
 
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
