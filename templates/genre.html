@@ -1,0 +1,51 @@
+<html>
+<body>
+<style>
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 5px;
+    text-align: left;
+}
+</style>
+<table>
+  {% if data|length > 0 %}
+  <tr>
+    <th>Name</th>
+    <th>Genre</th>
+    <th>Studio</th>
+    <th>Rating</th>
+    <th>Link</th>
+  </tr>
+  {% endif %}
+  {% for a in data %}
+  <TR>
+     <TD class="c1"><SPAN>{{a[0]}}</SPAN></TD>
+     <TD class="c2"><SPAN>{{a[1]}}</SPAN></TD>
+     <TD class="c4"><SPAN>{{a[3]}}</SPAN></TD>
+     <TD class="c5"><SPAN>{{a[4]}}</SPAN></TD>
+     <TD class="c6"><SPAN><a href="url">{{a[5]}}</a></SPAN></TD>
+  </TR>
+  {% endfor %}
+</table>
+
+
+<form method="GET" action="/">
+<p>Search Name: <input type="text" name="search"> <input type="submit" value="GO"></p>
+<h1>GENRES</h1>
+<input type="checkbox" name="genre" value="Action">Action<br>
+<input type="checkbox" name="genre" value="Comedy">Comedy <br>
+<input type="checkbox" name="genre" value="Drama">Drama <br>
+<input type="checkbox" name="genre" value="Fantasy">Fantasy <br>
+<input type="checkbox" name="genre" value="Sci-Fi">Sci-Fi <br>
+<input type="checkbox" name="genre" value="Mystery">Mystery <br>
+<input type="checkbox" name="genre" value="Thriller">Thriller <br>
+<input type="checkbox" name="genre" value="Music">Music <br>
+<input type="checkbox" name="genre" value="Romance">Romance
+<h2>Active Manga</h2>
+<input type="checkbox" name="manga" value="Yes">Yes
+</form>
+</body>
+</html>

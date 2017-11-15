@@ -110,15 +110,34 @@ def index():
 
   # DEBUG: this is debugging code to see what request looks like
   print request.args
+  print request.form
 
+  search = ''
+  genre = ''
+  manga = False
+  for key in request.args:
+      a = request.args.getlist(key)
+      if(key == "search"):
+          for val in a:
+              search = val
+      if(key == "genre"):
+          for val in a:
+              genre += val + ","
+      if(key == "manga"):
+          manga = True
 
+  sr = searchResults(search, genre[:-1], manga)
   #
   # example of a database query
   #
   cursor = g.conn.execute("SELECT name FROM test")
-  names = []
-  for result in cursor:
-    names.append(result['name'])  # can also be accessed using result[0]
+  data = []
+  for result in sr:
+      anime = []
+      for item in result:
+          anime.append(item)
+          print item
+      data.append(anime)  # can also be accessed using result[0]
   cursor.close()
 
   #
@@ -147,7 +166,7 @@ def index():
   #     <div>{{n}}</div>
   #     {% endfor %}
   #
-  context = dict(data = names)
+  context = dict(data = data)
 
 
   #
@@ -164,6 +183,49 @@ def index():
 # Notice that the function name is another() rather than index()
 # The functions for each app.route need to have different names
 #
+def searchResults(searchBar, genreCompiled, mangaActive):
+    searchWords = searchBar.strip().split(" ")
+    genres = genreCompiled.strip().split(",")
+    print len(genres)
+    query = ("""SELECT anime_name, genre_name, keyword, studio_name, rating, link
+                FROM (
+                    SELECT a.name AS anime_name, g.name AS genre_name, s.name AS studio_name, m.chapter, a.link, a.rating, g.keyword
+                    FROM anime a, studio s, genre g, manga m
+                    WHERE a.genre_id = g.gid
+                        AND a.studio_id = s.stid
+                        AND a.manga_id = m.mid) AS r
+                        """)
+
+    if ((len(genres) > 0) and (genres[0]!="")) or ((len(searchWords) > 0) and (searchWords[0]!="")) or (mangaActive):
+        query = query + "WHERE "
+
+    if (len(searchWords) > 0) and (searchWords[0]!=""):
+        query += "("
+        for word in searchWords:
+            query += "anime_name LIKE '%{0}%' OR ".format(word)
+        query = query[:-3]
+        query += ") OR "
+
+    #if len(searchWords) > 0:
+    #    query += "(anime_name LIKE '%{0}%')".format(word[0])
+    if (len(genres) > 0) and (genres[0]!=""):
+        query += "("
+        for genre in genres:
+            genreResult = "genre_name = '{0}'".format(genre)
+            query = query + genreResult + " OR "
+        query = query[:-3]
+        query += ") OR "
+
+    if mangaActive:
+        query = query +  " chapter LIKE '%-'"
+    elif ((len(genres) > 0) and (genres[0]!="")) or ((len(searchWords) > 0) and (searchWords[0]!="")):
+        query = query[:-3]
+
+    query = query + " ORDER BY rating DESC"
+
+    results = g.conn.execute(text(query)).fetchall()
+    return results
+
 @app.route('/another')
 def another():
   return render_template("another.html")
